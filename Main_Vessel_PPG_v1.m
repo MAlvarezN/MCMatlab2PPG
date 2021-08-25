@@ -13,6 +13,7 @@
 % generation is also demonstrated.
 
 %
+tic
 close all; clear; clc
 
 %% Geometry definition
@@ -25,15 +26,65 @@ model.G.Lx                = 1.4; % [cm] x size of simulation cuboid
 model.G.Ly                = 1.4; % [cm] y size of simulation cuboid
 model.G.Lz                = 0.8; % [cm] z size of simulation cuboid
 
-model.G.mediaPropertiesFunc = @mediaPropertiesFunc; % Media properties defined as a function at the end of this file
-model.G.geomFunc          = @geometryDefinition_BloodVessel; % Function to use for defining the distribution of media in the cuboid. Defined at the end of this m file.
+model.G.mediaPropertiesFunc = @mediaPropertiesFunc ; % Media properties defined as a function at the end of this file
+model.G.geomFunc            = @geometryDefinition_BloodVessel ; % Function to use for defining the distribution of media in the cuboid. Defined at the end of this m file.
 
-plot(model,'G');
-% return
+% ellipse parameters --------------------------------
+pL1 = .2 ;
+pL2 = -.3 ;
+    
+IDx  = .33 ; 
+pL1  = .2 ; 
+pwd1 = .20  ; 
+
+IDxd = .28 ; 
+pL2  = -.3 ; 
+pwd2 = .40 ; 
+
+
+model.G.geomFuncParams{1} = pL1 ; 
+model.G.geomFuncParams{2} = pL2 ; 
+
+model.G.geomFuncParams{3} = IDx ;
+model.G.geomFuncParams{4} = pL1 ;
+model.G.geomFuncParams{5} = pwd1;
+
+model.G.geomFuncParams{6} = IDxd;
+model.G.geomFuncParams{7} = pL2 ;
+model.G.geomFuncParams{8} = pwd2;
+% ---------------------------------------------------
+% body mass parameters
+bodymassindex = 25 ;
+switch bodymassindex
+    case 25
+        vessel_diameter = 0.25 ;
+        der_thick = 0.1 ; 
+    case 30
+        vessel_diameter = 0.275 ;
+        der_thick = 0.1325 ; 
+    case 35
+        vessel_diameter = 0.30 ;
+        der_thick = 0.175 ; 
+    case 40
+        vessel_diameter = 0.325 ;
+        der_thick = 0.2125 ; 
+    case 45
+        vessel_diameter = 0.35 ;
+        der_thick = 0.25 ; 
+    otherwise
+        disp('mmm... error!')
+        return
+end
+model.G.geomFuncParams{9} = vessel_diameter ;
+model.G.geomFuncParams{10} = der_thick ;
+
+plot(model,'G') ;
+view(-90,0)
+return
 %% Monte Carlo simulation
-model.MC.simulationTimeRequested  = .1; % [min] Time duration of the simulation
+model.MC.simulationTimeRequested  = .1 ; % [min] Time duration of the simulation
 
-model.MC.matchedInterfaces        = true; % Assumes all refractive indices are the same
+model.MC.matchedInterfaces        = true ; % Assumes all refractive indices are the same
 
 model.MC.boundaryType             = 1; % 0: No escaping boundaries, 
                                        % 1: All cuboid boundaries are escaping, 
@@ -42,7 +93,7 @@ model.MC.boundaryType             = 1; % 0: No escaping boundaries,
 model.MC.wavelength               = 660; % [nm] Excitation wavelength,
                                          %  used for determination of optical properties for excitation light
 
-model.MC.beam.beamType            = 4; % 0: Pencil beam, 
+model.MC.beam.beamType            = 2; % 0: Pencil beam, 
                                        % 1: Isotropically emitting line or point source, 
                                        % 2: Infinite plane wave,
                                        % 3: Laguerre-Gaussian LG01 beam, 
@@ -67,27 +118,30 @@ model.MC.beam.FF.radialWidth      = 0; % [rad] Radial far field 1/e^2 half-angle
                                        % For a diffraction limited Gaussian beam, this should be set to 
                                        %  model.MC.wavelength*1e-9/(pi*model.MC.beam.NF.radialWidth*1e-2))
 
-model.MC.beam.xFocus              = 0; % [cm] x position of focus
-model.MC.beam.yFocus              = 0; % [cm] y position of focus
+ypos = 0.3 ;
+
+model.MC.beam.xFocus              = .4 ; % [cm] x position of focus
+model.MC.beam.yFocus              = ypos ; % [cm] y position of focus
 model.MC.beam.zFocus              = 0; % [cm] z position of focus
 model.MC.beam.theta               = 0; % [rad] Polar angle of beam center axis
 model.MC.beam.phi                 = 0; % [rad] Azimuthal angle of beam center axis
 
 %% Light Collector
 model.MC.useLightCollector      = true;
-model.MC.LC.x         = 0.1 ; % [cm] x position of either the center of the objective lens focal plane or the fiber tip
-model.MC.LC.y         = 0.1 ; % [cm] y position
+% model.MC.LC.x         = 0.1 ; % [cm] x position of either the center of the objective lens focal plane or the fiber tip
+model.MC.LC.x         = model.MC.beam.xFocus - 0.97 ;
+model.MC.LC.y         = ypos ; % [cm] y position
 model.MC.LC.z         = 0.0 ; % [cm] z position
 
 model.MC.LC.theta     = 0; % [rad] Polar angle of direction the light collector is facing
 model.MC.LC.phi       = pi/2; % [rad] Azimuthal angle of direction the light collector is facing
 
-model.MC.LC.f         = .2;%.2; % [cm] Focal length of the objective lens (if light collector is a fiber, set this to Inf).
-model.MC.LC.diam      = .1; % [cm] Diameter of the light collector aperture. For an ideal thin lens, this is 2*f*tan(asin(NA)).
-model.MC.LC.fieldSize = .1; % [cm] Field Size of the imaging system (diameter of area in object plane that gets imaged). Only used for finite f.
-model.MC.LC.NA        = 0.22; % [-] Fiber NA. Only used for infinite f.
+model.MC.LC.f         = .4;%.2; % [cm] Focal length of the objective lens (if light collector is a fiber, set this to Inf).
+model.MC.LC.diam      = .35; % [cm] Diameter of the light collector aperture. For an ideal thin lens, this is 2*f*tan(asin(NA)).
+model.MC.LC.fieldSize = .35; % [cm] Field Size of the imaging system (diameter of area in object plane that gets imaged). Only used for finite f.
+model.MC.LC.NA        = 0.866; % [-] Fiber NA. Only used for infinite f.
 
-model.MC.LC.res       = 1;%50; % X and Y resolution of light collector in pixels, only used for finite f
+model.MC.LC.res       = 1; % X and Y resolution of light collector in pixels, only used for finite f
 
 % model.MC.LC.tStart    = -1e-13; % [s] Start of the detection time-of-flight interval
 % model.MC.LC.tEnd      = 5e-12; % [s] End of the detection time-of-flight interval
@@ -98,6 +152,10 @@ model.MC.LC.res       = 1;%50; % X and Y resolution of light collector in pixels
 model = runMonteCarlo(model);
 
 plot(model,'MC');
+
+toc
+
+reflectance_vessel
 
 %% Heat simulation
 % model.MC.P                   = 3; % [W] Incident pulse peak power (in case of infinite plane waves, only the power incident upon the cuboid's top surface)
@@ -139,22 +197,47 @@ function M = geometryDefinition_BloodVessel(X,Y,Z,parameters)
 % Blood vessel example:
 zsurf     = 0.005; % cm
 epd_thick = 0.01;
-der_thick = 0.1 ; 
+% der_thick = 0.1 ; 
 vessel_thick = 0.02 ; 
-vessel_diameter = 0.25 ;
+% vessel_diameter = 0.25 ;
+
+try
+    vessel_diameter =  parameters{9} ;
+    der_thick       =  parameters{10} ; 
+catch
+    vessel_diameter = 0.25 ;
+    der_thick = 0.1 ; 
+end
 vesselradiusOut  = vessel_diameter / 2 ;
 vesselradius  = vesselradiusOut - vessel_thick ;
 vesseldepth = 0.4;
+
 M = ones(size(X)); % fill background with water (gel)
 M(Z > zsurf) = 7; % rEpidermis
 M(Z > zsurf + epd_thick) = 3; % dermis
-M(Z > zsurf + epd_thick + der_thick) = 5 ; % subcutis
-M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradiusOut^2) = 6 ; % vessel
+M(Z > zsurf + epd_thick + der_thick) = 6 ; % subcutis
+M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradiusOut^2) = 5 ; % vessel
 M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradius^2) = 4 ; % blood
 
 % ellipsoid eqtuations ----------------------------------------------------
-d    = zsurf + vesseldepth ; 
 
+try
+    pL1 = parameters{1} ;
+    pL2 = parameters{2} ;
+    
+    
+IDx  = parameters{3} ;
+pL1  = parameters{4} ;
+pwd1 = parameters{5} ;
+
+IDxd = parameters{6} ;
+pL2  = parameters{7} ;
+pwd2 = parameters{8} ;
+
+catch
+    pL1 = .2 ;
+    pL2 = -.3 ;
+    
 IDx  = .33 ; 
 pL1  = .2 ; 
 pwd1 = .33 ; 
@@ -163,11 +246,15 @@ IDxd = .28 ;
 pL2  = -.3 ; 
 pwd2 = .28 ; 
 
+end
+d    = zsurf + vesseldepth ; 
+
+
 cond_Eq2 = (X./(IDx/2)).^2 + ((Z-d)./(IDx/2)).^2 + ((Y+pL1)./(pwd1)).^2 <= 1 ;
-M( cond_Eq2 ) = 6 ; % vessel
+M( cond_Eq2 ) = 5 ; % vessel
 
 cond_Eq3 = (X./(IDxd/2)).^2 + ((Z-d)./(IDxd/2)).^2 + ((Y+pL2)./(pwd2)).^2 <= 1 ;
-M( cond_Eq3 ) = 6 ; % vessel
+M( cond_Eq3 ) = 5 ; % vessel
 
 % Adjust the blood in vessel
 cond_Eq22 = (X./(IDx/2 - vessel_thick)).^2 + ((Z-d)./(IDx/2 - vessel_thick)).^2 + ((Y+pL1)./(pwd1 - vessel_thick)).^2 <= 1 ;
@@ -286,16 +373,16 @@ mediaProperties(j).n   = 1.4 ;
 % mediaProperties(j).E   = 422.5e3; % J/mol    PLACEHOLDER DATA ONLY
 % mediaProperties(j).A   = 7.6e66; % 1/s        PLACEHOLDER DATA ONLY
 
-j = 5 ;
+j = 6 ;
 mediaProperties(j).name  = 'subcutis';
 mediaProperties(j).mua   = 0.0001 ;
 mediaProperties(j).mus   = 249.7 ;
-mediaProperties(j).g     = 0.7 ;
-mediaProperties(j).n     = 1.47 ;
+mediaProperties(j).g     = 0.9 ; % 0.7 2021
+mediaProperties(j).n     = 1.4 ; % 1.47 2021
 % mediaProperties(j).VHC   = 4.19;
 % mediaProperties(j).TC    = 5.8e-3;
 
-j = 6 ;
+j = 5 ;
 mediaProperties(j).name  = 'vessel';
 mediaProperties(j).mua   = 0.8 ;
 mediaProperties(j).mus   = 230 ;
@@ -312,8 +399,5 @@ mediaProperties(j).g     = 0.7 ;
 mediaProperties(j).n     = 1.47 ;
 % mediaProperties(j).VHC   = 4.19;
 % mediaProperties(j).TC    = 5.8e-3;
-
-
-
 
 end
