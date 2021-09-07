@@ -13,7 +13,8 @@
 % generation is also demonstrated.
 
 %
-close all; clear; clc
+
+% close all; clear; clc
 
 %% Geometry definition
 model = MCmatlab.model;
@@ -26,10 +27,61 @@ model.G.Ly                = 1.4; % [cm] y size of simulation cuboid
 model.G.Lz                = 0.8; % [cm] z size of simulation cuboid
 
 model.G.mediaPropertiesFunc = @mediaPropertiesFunc ; % Media properties defined as a function at the end of this file
-model.G.geomFunc            = @geometryDefinition_BloodVessel ; % Function to use for defining the distribution of media in the cuboid. Defined at the end of this m file.
+model.G.geomFunc            = @geometryDefinition_BloodVessel ; 
+                                                                % Function to use for defining the distribution of
+                                                                % media in the cuboid. Defined at the end of this m file.
 
-plot(model,'G') ;
-% return
+% ellipse parameters --------------------------------
+pL1 = .2 ;
+pL2 = -.3 ;
+    
+IDx  = .33 ; 
+% pL1  = .2 ; 
+pwd1 = .20  ; 
+
+IDxd = .28 ; 
+% pL2  = -.3 ; 
+pwd2 = .40 ; 
+
+
+model.G.geomFuncParams{1} = pL1 ; 
+model.G.geomFuncParams{2} = pL2 ; 
+
+model.G.geomFuncParams{3} = IDx ;
+% model.G.geomFuncParams{4} = pL1 ;
+model.G.geomFuncParams{5} = pwd1;
+
+model.G.geomFuncParams{6} = IDxd;
+% model.G.geomFuncParams{7} = pL2 ;
+model.G.geomFuncParams{8} = pwd2;
+% ---------------------------------------------------
+% body mass parameters
+bodymassindex = 25 ;
+switch bodymassindex
+    case 25
+        vessel_diameter = 0.25 ;
+        der_thick = 0.1 ; 
+    case 30
+        vessel_diameter = 0.275 ;
+        der_thick = 0.1325 ; 
+    case 35
+        vessel_diameter = 0.30 ;
+        der_thick = 0.175 ; 
+    case 40
+        vessel_diameter = 0.325 ;
+        der_thick = 0.2125 ; 
+    case 45
+        vessel_diameter = 0.35 ;
+        der_thick = 0.25 ; 
+    otherwise
+        disp('mmm... error!')
+        return
+end
+model.G.geomFuncParams{9} = vessel_diameter ;
+model.G.geomFuncParams{10} = der_thick ;
+
+% plot(model,'G') ; % Dont need the plot in this part
+
 %% Monte Carlo simulation
 model.MC.simulationTimeRequested  = .1 ; % [min] Time duration of the simulation
 
@@ -38,11 +90,13 @@ model.MC.matchedInterfaces        = true ; % Assumes all refractive indices are 
 model.MC.boundaryType             = 1; % 0: No escaping boundaries, 
                                        % 1: All cuboid boundaries are escaping, 
                                        % 2: Top cuboid boundary only is escaping
-                                       
-model.MC.wavelength               = 660; % [nm] Excitation wavelength,
-                                         %  used for determination of optical properties for excitation light
+% lambda values: 660 - 750 - 800 - 850 - 900 - 950                                       
+model.MC.wavelength               = 890; % [nm] Excitation wavelength,
+                                         %  used for determination of optical properties for excitation 
+                                         %  light
+% model.G.mediaPropParams{1} = model.MC.wavelength ;
 
-model.MC.beam.beamType            = 4; % 0: Pencil beam, 
+model.MC.beam.beamType            = 2; % 0: Pencil beam, 
                                        % 1: Isotropically emitting line or point source, 
                                        % 2: Infinite plane wave,
                                        % 3: Laguerre-Gaussian LG01 beam, 
@@ -67,9 +121,9 @@ model.MC.beam.FF.radialWidth      = 0; % [rad] Radial far field 1/e^2 half-angle
                                        % For a diffraction limited Gaussian beam, this should be set to 
                                        %  model.MC.wavelength*1e-9/(pi*model.MC.beam.NF.radialWidth*1e-2))
 
-ypos = 0.3 ;
+ypos = 0.0 ;
 
-model.MC.beam.xFocus              = 0.45 ; % [cm] x position of focus
+model.MC.beam.xFocus              = .4 ; % [cm] x position of focus
 model.MC.beam.yFocus              = ypos ; % [cm] y position of focus
 model.MC.beam.zFocus              = 0; % [cm] z position of focus
 model.MC.beam.theta               = 0; % [rad] Polar angle of beam center axis
@@ -85,52 +139,89 @@ model.MC.LC.z         = 0.0 ; % [cm] z position
 model.MC.LC.theta     = 0; % [rad] Polar angle of direction the light collector is facing
 model.MC.LC.phi       = pi/2; % [rad] Azimuthal angle of direction the light collector is facing
 
-model.MC.LC.f         = .2;%.2; % [cm] Focal length of the objective lens (if light collector is a fiber, set this to Inf).
-model.MC.LC.diam      = .1; % [cm] Diameter of the light collector aperture. For an ideal thin lens, this is 2*f*tan(asin(NA)).
-model.MC.LC.fieldSize = .1; % [cm] Field Size of the imaging system (diameter of area in object plane that gets imaged). Only used for finite f.
-model.MC.LC.NA        = 0.22; % [-] Fiber NA. Only used for infinite f.
+model.MC.LC.f         = .4;%.2; % [cm] Focal length of the objective lens (if light collector is a fiber, set this to Inf).
+model.MC.LC.diam      = .35; % [cm] Diameter of the light collector aperture. For an ideal thin lens, this is 2*f*tan(asin(NA)).
+model.MC.LC.fieldSize = .35; % [cm] Field Size of the imaging system (diameter of area in object plane that gets imaged). Only used for finite f.
+model.MC.LC.NA        = 0.866; % [-] Fiber NA. Only used for infinite f.
 
-model.MC.LC.res       = 50; % X and Y resolution of light collector in pixels, only used for finite f
+model.MC.LC.res       = 1; % X and Y resolution of light collector in pixels, only used for finite f
 
 % model.MC.LC.tStart    = -1e-13; % [s] Start of the detection time-of-flight interval
 % model.MC.LC.tEnd      = 5e-12; % [s] End of the detection time-of-flight interval
 % model.MC.LC.nTimeBins = 30; % (Default: 0) Number of bins between tStart and tEnd. If zero, the measurement is not time-resolved. 
 
 
+%% Compute for each position
+
+
+% Distance (guess) for the Ellipses on geometry
+    pL1 = .2 ;
+    pL2 = -.3 ;
+
+Nsteps = 100 ;
+pL1values = linspace( - model.G.Ly/2 - (2* pL1 ) , model.G.Ly/2 + 2*( pL1 - pL2 ) , Nsteps ) ;
+pL2values = pL1values - ( pL1 - pL2 ) ;
+
+% a = gcf ;
+% figure(a.Number);
+
+% p = polyfit(pL1values,mean(cummulativePowerAbsorTrial),20) ;
+
+% start trials
+for k = 1 : 30
+rng(k)
+    clc
+disp(["trial: " + k])
+% Save current model: date + beam type
+fldResults0 = "..\Results\2021\09_02" ;
+fldResults  = fldResults0 +         "\bt2_t" + k + "\";
+mkdir(fldResults) % make the folder dont worry if the folder exists
+
+time = zeros( 1 , Nsteps ) ;
+for i = 1 : Nsteps
+    disp(["Step: " + i + " / " + Nsteps ])
+    model.G.geomFuncParams{1} = pL1values( i ) ; 
+    model.G.geomFuncParams{2} = pL2values( i ) ; 
+
+%     f=figure(1);
+%     f.Position = [1   100   895   648];
+%         plot(model,'G') ; 
+%         drawnow
+%     g=figure(2);
+%     g.Position = [900   100   711   648];
+%         plot(mean(cummulativePowerAbsorTrial(:,1:i))) ; 
+%         drawnow
+%         hold on
+%         plot(polyval(p,pL1values(1:i)))
+%         title('PPG')
+% % 
+tic    
 % Execution, do not modify the next line:
 model = runMonteCarlo(model);
-
 plot(model,'MC');
+time( i ) = toc ;
 
-reflectance_vessel
+if k==1 && i==1
+    disp(" Save one model to save all parameters...")
+    nameModel = fldResults0 + "\model" ;
+    save(nameModel,'model') ;
+end
+    
 
-%% Heat simulation
-% model.MC.P                   = 3; % [W] Incident pulse peak power (in case of infinite plane waves, only the power incident upon the cuboid's top surface)
-% 
-% model.HS.useAllCPUs          = true; % If false, MCmatlab will leave one processor unused. Useful for doing other work on the PC while simulations are running.
-% model.HS.makeMovie           = true; % Requires silentMode = false.
-% model.HS.largeTimeSteps      = false; % (Default: false) If true, calculations will be faster, but some voxel temperatures may be slightly less precise. Test for yourself whether this precision is acceptable for your application.
-% 
-% model.HS.heatBoundaryType    = 0; % 0: Insulating boundaries, 1: Constant-temperature boundaries (heat-sinked)
-% model.HS.durationOn          = 0.001; % [s] Pulse on-duration
-% model.HS.durationOff         = 0.004; % [s] Pulse off-duration
-% model.HS.durationEnd         = 0.02; % [s] Non-illuminated relaxation time to add to the end of the simulation to let temperature diffuse after the pulse train
-% model.HS.Tinitial            = 37; % [deg C] Initial temperature
-% 
-% model.HS.nPulses             = 5; % Number of consecutive pulses, each with an illumination phase and a diffusion phase. If simulating only illumination or only diffusion, use nPulses = 1.
-% 
-% model.HS.plotTempLimits      = [37 100]; % [deg C] Expected range of temperatures, used only for setting the color scale in the plot
-% model.HS.nUpdates            = 100; % Number of times data is extracted for plots during each pulse. A minimum of 1 update is performed in each phase (2 for each pulse consisting of an illumination phase and a diffusion phase)
-% model.HS.slicePositions      = [.5 0.6 1]; % Relative slice positions [x y z] for the 3D plots on a scale from 0 to 1
-% model.HS.tempSensorPositions = [0 0 0.038
-%                                 0 0 0.04
-%                                 0 0 0.042
-%                                 0 0 0.044]; % Each row is a temperature sensor's absolute [x y z] coordinates. Leave the matrix empty ([]) to disable temperature sensors.
-% % 
-% % % Execution, do not modify the next line:
-% % % model = simulateHeatDistribution(model);
-% % % 
-% % % plot(model,'HS');
+% Save current model
+nameModel = fldResults + "modelMC_pL1_" + i + "_" + Nsteps ;
+MCorFMC = model.MC ;
+save(nameModel,'MCorFMC') ;
+
+end
+
+% Save time execution
+nameTimeModel = fldResults + "time_modelMC_pL1" ;
+save(nameTimeModel,'time') ;
+
+end % trials
+
+% reflectance_vessel
 
 %% Post-processing
 
@@ -144,35 +235,63 @@ function M = geometryDefinition_BloodVessel(X,Y,Z,parameters)
 % Blood vessel example:
 zsurf     = 0.005; % cm
 epd_thick = 0.01;
-der_thick = 0.1 ; 
+% der_thick = 0.1 ; 
 vessel_thick = 0.02 ; 
-vessel_diameter = 0.25 ;
+% vessel_diameter = 0.25 ;
+
+try
+    vessel_diameter =  parameters{9} ;
+    der_thick       =  parameters{10} ; 
+catch
+    vessel_diameter = 0.25 ;
+    der_thick = 0.1 ; 
+end
 vesselradiusOut  = vessel_diameter / 2 ;
 vesselradius  = vesselradiusOut - vessel_thick ;
 vesseldepth = 0.4;
+
 M = ones(size(X)); % fill background with water (gel)
 M(Z > zsurf) = 7; % rEpidermis
 M(Z > zsurf + epd_thick) = 3; % dermis
-M(Z > zsurf + epd_thick + der_thick) = 5 ; % subcutis
-M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradiusOut^2) = 6 ; % vessel
+M(Z > zsurf + epd_thick + der_thick) = 6 ; % subcutis
+M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradiusOut^2) = 5 ; % vessel
 M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradius^2) = 4 ; % blood
 
 % ellipsoid eqtuations ----------------------------------------------------
-d    = zsurf + vesseldepth ; 
 
-IDx  = .33 ; 
-pL1  = .2 ; 
-pwd1 = .33 ; 
+try
+    pL1 = parameters{1} ;
+    pL2 = parameters{2} ;
+    
 
-IDxd = .28 ; 
-pL2  = -.3 ; 
-pwd2 = .28 ; 
+    IDx  = parameters{3} ;
+%     pL1  = parameters{4} ;
+    pwd1 = parameters{5} ;
+
+    IDxd = parameters{6} ;
+%     pL2  = parameters{7} ;
+    pwd2 = parameters{8} ;
+
+catch
+    pL1 = .2 ;
+    pL2 = -.3 ;
+    
+    IDx  = .33 ; 
+%     pL1  = .2 ; 
+    pwd1 = .33 ; 
+
+    IDxd = .28 ; 
+%     pL2  = -.3 ; 
+    pwd2 = .28 ; 
+
+end
+d    = zsurf + vesseldepth ;
 
 cond_Eq2 = (X./(IDx/2)).^2 + ((Z-d)./(IDx/2)).^2 + ((Y+pL1)./(pwd1)).^2 <= 1 ;
-M( cond_Eq2 ) = 6 ; % vessel
+M( cond_Eq2 ) = 5 ; % vessel
 
 cond_Eq3 = (X./(IDxd/2)).^2 + ((Z-d)./(IDxd/2)).^2 + ((Y+pL2)./(pwd2)).^2 <= 1 ;
-M( cond_Eq3 ) = 6 ; % vessel
+M( cond_Eq3 ) = 5 ; % vessel
 
 % Adjust the blood in vessel
 cond_Eq22 = (X./(IDx/2 - vessel_thick)).^2 + ((Z-d)./(IDx/2 - vessel_thick)).^2 + ((Y+pL1)./(pwd1 - vessel_thick)).^2 <= 1 ;
@@ -269,7 +388,11 @@ mediaProperties(j).TC  = 0.37e-2;
 % mediaProperties(j).E   = 422.5e3; % J/mol    PLACEHOLDER DATA ONLY
 % mediaProperties(j).A   = 7.6e66; % 1/s        PLACEHOLDER DATA ONLY
 
+
+switch wavelength
+    
 % 660 nm ------------------------------------------------------------------
+    case 660
 
 j=3;
 mediaProperties(j).name = 'dermis';
@@ -291,7 +414,7 @@ mediaProperties(j).n   = 1.4 ;
 % mediaProperties(j).E   = 422.5e3; % J/mol    PLACEHOLDER DATA ONLY
 % mediaProperties(j).A   = 7.6e66; % 1/s        PLACEHOLDER DATA ONLY
 
-j = 5 ;
+j = 6 ;
 mediaProperties(j).name  = 'subcutis';
 mediaProperties(j).mua   = 0.0001 ;
 mediaProperties(j).mus   = 249.7 ;
@@ -300,7 +423,7 @@ mediaProperties(j).n     = 1.47 ;
 % mediaProperties(j).VHC   = 4.19;
 % mediaProperties(j).TC    = 5.8e-3;
 
-j = 6 ;
+j = 5 ;
 mediaProperties(j).name  = 'vessel';
 mediaProperties(j).mua   = 0.8 ;
 mediaProperties(j).mus   = 230 ;
@@ -317,5 +440,62 @@ mediaProperties(j).g     = 0.7 ;
 mediaProperties(j).n     = 1.47 ;
 % mediaProperties(j).VHC   = 4.19;
 % mediaProperties(j).TC    = 5.8e-3;
+
+% 890 nm ------------------------------------------------------------------
+    case 890
+
+j=3;
+mediaProperties(j).name = 'dermis';
+mediaProperties(j).mua = 2459 ;
+mediaProperties(j).mus = 116.7 ;
+mediaProperties(j).g   = 0.7 ;
+mediaProperties(j).n   = 1.47 ;
+% mediaProperties(j).VHC = 3391*1.109e-3;
+% mediaProperties(j).TC  = 0.37e-2;
+
+j=4;
+mediaProperties(j).name  = 'blood';
+mediaProperties(j).mua =  6.32 ;
+mediaProperties(j).mus = 56.18 ;
+mediaProperties(j).g   =  0.9 ;
+mediaProperties(j).n   =  1.4 ;
+% mediaProperties(j).VHC = 3617*1.050e-3;
+% mediaProperties(j).TC  = 0.52e-2;
+% mediaProperties(j).E   = 422.5e3; % J/mol    PLACEHOLDER DATA ONLY
+% mediaProperties(j).A   = 7.6e66; % 1/s        PLACEHOLDER DATA ONLY
+
+j = 6 ;
+mediaProperties(j).name  = 'subcutis';
+mediaProperties(j).mua   = 0.0217 ;
+mediaProperties(j).mus   = 189.8 ;
+mediaProperties(j).g     = 0.7 ;
+mediaProperties(j).n     = 1.47 ;
+% mediaProperties(j).VHC   = 4.19;
+% mediaProperties(j).TC    = 5.8e-3;
+
+j = 5 ;
+mediaProperties(j).name  = 'vessel';
+mediaProperties(j).mua   = 0.8 ;
+mediaProperties(j).mus   = 230 ;
+mediaProperties(j).g     = 0.9 ;
+mediaProperties(j).n     = 1.4 ;
+% mediaProperties(j).VHC   = 4.19;
+% mediaProperties(j).TC    = 5.8e-3;
+
+j = 7 ;
+mediaProperties(j).name  = 'rEpidermis';
+mediaProperties(j).mua   = 0.3184 ;
+mediaProperties(j).mus   = 224.7 ;
+mediaProperties(j).g     = 0.7 ;
+mediaProperties(j).n     = 1.47 ;
+% mediaProperties(j).VHC   = 4.19;
+% mediaProperties(j).TC    = 5.8e-3;
+
+% -------------------------------------------------------------------------
+    otherwise
+        disp('mmm...')
+        disp('Unknown parameters for selected wavelength')
+        return
+end
 
 end
