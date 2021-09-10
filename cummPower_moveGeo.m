@@ -11,11 +11,11 @@ Nsteps = 100 ;
 
 %% trials
 cummulativePowerAbsorTrial = zeros(5,Nsteps) ; 
-for k = 1 : 1
+for k = 1 : 10
     home
 disp(["trial: " + k])
 % Save current model: date + beam type
-fldResults = "..\Results\2021\09_02\bt2_t" + k + "\";
+fldResults = "..\Results\2021\09_10\bt2_t" + k + "\";
 
 cummlativePowerAbsor = zeros(1,Nsteps) ;
 for j = 1 : Nsteps
@@ -49,7 +49,8 @@ end
     drawnow
     xlabel('y[cm]')
     ylabel('total Power (sum(sum))')
-    title('ppg?')
+    ntitle = "ppg 890[nm] (10 trial)" ;
+    title(ntitle)
 %     pause(.0001)
     
 end
@@ -61,6 +62,12 @@ end
 figure,
 boxplot(cummulativePowerAbsorTrial)
 
+figure,
+p = polyfit(pL1values,mean(cummulativePowerAbsorTrial),20) ;
+    plot(mean(cummulativePowerAbsorTrial(:,1:i))) ; 
+    hold on
+    plot(polyval(p,pL1values(1:i)))
+    title(ntitle)
 return
 figure,
 subplot(151),
