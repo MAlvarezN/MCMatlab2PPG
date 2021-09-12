@@ -91,7 +91,7 @@ model.MC.boundaryType             = 1; % 0: No escaping boundaries,
                                        % 1: All cuboid boundaries are escaping, 
                                        % 2: Top cuboid boundary only is escaping
 % lambda values: 660 - 750 - 800 - 850 - 900 - 950                                       
-model.MC.wavelength               = 890; % [nm] Excitation wavelength,
+model.MC.wavelength               = 500 ; % [nm] Excitation wavelength,
                                          %  used for determination of optical properties for excitation 
                                          %  light
 % model.G.mediaPropParams{1} = model.MC.wavelength ;
@@ -168,12 +168,12 @@ pL2values = pL1values - ( pL1 - pL2 ) ;
 % p = polyfit(pL1values,mean(cummulativePowerAbsorTrial),20) ;
 
 % start trials
-for k = 1 : 30
+for k = 1 : 10
 rng(k)
     clc
 disp(["trial: " + k])
 % Save current model: date + beam type
-fldResults0 = "..\Results\2021\09_02" ;
+fldResults0 = "..\Results\2021\09_11_500" ;
 fldResults  = fldResults0 +         "\bt2_t" + k + "\";
 mkdir(fldResults) % make the folder dont worry if the folder exists
 
@@ -251,11 +251,11 @@ vesselradius  = vesselradiusOut - vessel_thick ;
 vesseldepth = 0.4;
 
 M = ones(size(X)); % fill background with water (gel)
-M(Z > zsurf) = 7; % rEpidermis
-M(Z > zsurf + epd_thick) = 3; % dermis
-M(Z > zsurf + epd_thick + der_thick) = 6 ; % subcutis
-M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradiusOut^2) = 5 ; % vessel
-M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradius^2) = 4 ; % blood
+M(Z > zsurf) = 6; % rEpidermis
+M(Z > zsurf + epd_thick) = 2; % dermis
+M(Z > zsurf + epd_thick + der_thick) = 5 ; % subcutis
+M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradiusOut^2) = 4 ; % vessel
+M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradius^2) = 3 ; % blood
 
 % ellipsoid eqtuations ----------------------------------------------------
 
@@ -288,19 +288,19 @@ end
 d    = zsurf + vesseldepth ;
 
 cond_Eq2 = (X./(IDx/2)).^2 + ((Z-d)./(IDx/2)).^2 + ((Y+pL1)./(pwd1)).^2 <= 1 ;
-M( cond_Eq2 ) = 5 ; % vessel
+M( cond_Eq2 ) = 4 ; % vessel
 
 cond_Eq3 = (X./(IDxd/2)).^2 + ((Z-d)./(IDxd/2)).^2 + ((Y+pL2)./(pwd2)).^2 <= 1 ;
-M( cond_Eq3 ) = 5 ; % vessel
+M( cond_Eq3 ) = 4 ; % vessel
 
 % Adjust the blood in vessel
 cond_Eq22 = (X./(IDx/2 - vessel_thick)).^2 + ((Z-d)./(IDx/2 - vessel_thick)).^2 + ((Y+pL1)./(pwd1 - vessel_thick)).^2 <= 1 ;
-M( cond_Eq22 ) = 4 ; % blood
+M( cond_Eq22 ) = 3 ; % blood
 cond_Eq32 = (X./(IDxd/2 - vessel_thick)).^2 + ((Z-d)./(IDxd/2 - vessel_thick)).^2 + ((Y+pL2)./(pwd2 - vessel_thick)).^2 <= 1 ;
-M( cond_Eq32 ) = 4 ; % blood
+M( cond_Eq32 ) = 3 ; % blood
 
 % add blood
-M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradius^2) = 4 ; % blood
+M(X.^2 + (Z - (zsurf + vesseldepth)).^2 < vesselradius^2) = 3 ; % blood
 
 
 end
@@ -329,24 +329,24 @@ mediaProperties(j).n     = 1.3;
 mediaProperties(j).VHC   = 4.19;
 mediaProperties(j).TC    = 5.8e-3;
 
-j=2;
-mediaProperties(j).name  = 'epidermis';
-B = 0;
-S = 0.75;
-W = 0.75;
-Me = 0.03;
-musp500 = 40;
-fray    = 0.0;
-bmie    = 1.0;
-gg      = 0.90;
-musp = musp500*(fray*(wavelength/500).^-4 + (1-fray)*(wavelength/500).^-bmie);
-X = [B*S B*(1-S) W Me]';
-mediaProperties(j).mua = MU*X;
-mediaProperties(j).mus = musp/(1-gg);
-mediaProperties(j).g   = gg;
-mediaProperties(j).n   = 1.3;
-mediaProperties(j).VHC = 3391*1.109e-3;
-mediaProperties(j).TC  = 0.37e-2;
+% j=2;
+% mediaProperties(j).name  = 'epidermis';
+% B = 0;
+% S = 0.75;
+% W = 0.75;
+% Me = 0.03;
+% musp500 = 40;
+% fray    = 0.0;
+% bmie    = 1.0;
+% gg      = 0.90;
+% musp = musp500*(fray*(wavelength/500).^-4 + (1-fray)*(wavelength/500).^-bmie);
+% X = [B*S B*(1-S) W Me]';
+% mediaProperties(j).mua = MU*X;
+% mediaProperties(j).mus = musp/(1-gg);
+% mediaProperties(j).g   = gg;
+% mediaProperties(j).n   = 1.3;
+% mediaProperties(j).VHC = 3391*1.109e-3;
+% mediaProperties(j).TC  = 0.37e-2;
 
 % j=3;
 % mediaProperties(j).name = 'dermis';
@@ -394,7 +394,7 @@ switch wavelength
 % 660 nm ------------------------------------------------------------------
     case 660
 
-j=3;
+j=2;
 mediaProperties(j).name = 'dermis';
 mediaProperties(j).mua = 0.5453 ;
 mediaProperties(j).mus = 208.6 ;
@@ -403,7 +403,7 @@ mediaProperties(j).n   = 1.47 ;
 % mediaProperties(j).VHC = 3391*1.109e-3;
 % mediaProperties(j).TC  = 0.37e-2;
 
-j=4;
+j=3;
 mediaProperties(j).name  = 'blood';
 mediaProperties(j).mua = 2.026 ;
 mediaProperties(j).mus = 75.76 ;
@@ -414,7 +414,7 @@ mediaProperties(j).n   = 1.4 ;
 % mediaProperties(j).E   = 422.5e3; % J/mol    PLACEHOLDER DATA ONLY
 % mediaProperties(j).A   = 7.6e66; % 1/s        PLACEHOLDER DATA ONLY
 
-j = 6 ;
+j = 5 ;
 mediaProperties(j).name  = 'subcutis';
 mediaProperties(j).mua   = 0.0001 ;
 mediaProperties(j).mus   = 249.7 ;
@@ -423,7 +423,7 @@ mediaProperties(j).n     = 1.47 ;
 % mediaProperties(j).VHC   = 4.19;
 % mediaProperties(j).TC    = 5.8e-3;
 
-j = 5 ;
+j = 4 ;
 mediaProperties(j).name  = 'vessel';
 mediaProperties(j).mua   = 0.8 ;
 mediaProperties(j).mus   = 230 ;
@@ -432,7 +432,7 @@ mediaProperties(j).n     = 1.4 ;
 % mediaProperties(j).VHC   = 4.19;
 % mediaProperties(j).TC    = 5.8e-3;
 
-j = 7 ;
+j = 6 ;
 mediaProperties(j).name  = 'rEpidermis';
 mediaProperties(j).mua   = 0.3442 ;
 mediaProperties(j).mus   = 121.2 ;
@@ -444,16 +444,16 @@ mediaProperties(j).n     = 1.47 ;
 % 890 nm ------------------------------------------------------------------
     case 890
 
-j=3;
+j=2;
 mediaProperties(j).name = 'dermis';
-mediaProperties(j).mua = 2459 ;
+mediaProperties(j).mua = 0.2459 ;
 mediaProperties(j).mus = 116.7 ;
 mediaProperties(j).g   = 0.7 ;
 mediaProperties(j).n   = 1.47 ;
 % mediaProperties(j).VHC = 3391*1.109e-3;
 % mediaProperties(j).TC  = 0.37e-2;
 
-j=4;
+j=3;
 mediaProperties(j).name  = 'blood';
 mediaProperties(j).mua =  6.32 ;
 mediaProperties(j).mus = 56.18 ;
@@ -464,7 +464,7 @@ mediaProperties(j).n   =  1.4 ;
 % mediaProperties(j).E   = 422.5e3; % J/mol    PLACEHOLDER DATA ONLY
 % mediaProperties(j).A   = 7.6e66; % 1/s        PLACEHOLDER DATA ONLY
 
-j = 6 ;
+j = 5 ;
 mediaProperties(j).name  = 'subcutis';
 mediaProperties(j).mua   = 0.0217 ;
 mediaProperties(j).mus   = 189.8 ;
@@ -473,7 +473,7 @@ mediaProperties(j).n     = 1.47 ;
 % mediaProperties(j).VHC   = 4.19;
 % mediaProperties(j).TC    = 5.8e-3;
 
-j = 5 ;
+j = 4 ;
 mediaProperties(j).name  = 'vessel';
 mediaProperties(j).mua   = 0.8 ;
 mediaProperties(j).mus   = 230 ;
@@ -482,7 +482,7 @@ mediaProperties(j).n     = 1.4 ;
 % mediaProperties(j).VHC   = 4.19;
 % mediaProperties(j).TC    = 5.8e-3;
 
-j = 7 ;
+j = 6 ;
 mediaProperties(j).name  = 'rEpidermis';
 mediaProperties(j).mua   = 0.3184 ;
 mediaProperties(j).mus   = 224.7 ;
@@ -491,11 +491,45 @@ mediaProperties(j).n     = 1.47 ;
 % mediaProperties(j).VHC   = 4.19;
 % mediaProperties(j).TC    = 5.8e-3;
 
+% 500 nm ------------------------------------------------------------------
+    case 500
+
+j=2;
+mediaProperties(j).name = 'dermis';
+mediaProperties(j).mua = 1.51 ;
+mediaProperties(j).mus = 424 ;
+mediaProperties(j).g   = 0.9 ;
+mediaProperties(j).n   = 1.4 ;
+j=3;
+mediaProperties(j).name  = 'blood';
+mediaProperties(j).mua = 1.12 ;%112 ?
+mediaProperties(j).mus = 100 ;
+mediaProperties(j).g   = 0.9 ;
+mediaProperties(j).n   = 1.4 ;
+j = 5 ;
+mediaProperties(j).name  = 'subcutis';
+mediaProperties(j).mua   = 0.0001 ;
+mediaProperties(j).mus   = 350 ;
+mediaProperties(j).g     = 0.9 ;
+mediaProperties(j).n     = 1.4 ;
+j = 4 ;
+mediaProperties(j).name  = 'vessel';
+mediaProperties(j).mua   = 0.8 ;
+mediaProperties(j).mus   = 230 ;
+mediaProperties(j).g     = 0.9 ;
+mediaProperties(j).n     = 1.4 ;
+j = 6 ;
+mediaProperties(j).name  = 'rEpidermis';
+mediaProperties(j).mua   = 2.16 ;
+mediaProperties(j).mus   = 400 ;
+mediaProperties(j).g     = 0.9 ;
+mediaProperties(j).n     = 1.4 ;
 % -------------------------------------------------------------------------
     otherwise
         disp('mmm...')
         disp('Unknown parameters for selected wavelength')
         return
 end
+
 
 end
