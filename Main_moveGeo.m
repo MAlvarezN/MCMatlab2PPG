@@ -558,6 +558,10 @@ mediaProperties(j).mua   = 0.708 ;
 mediaProperties(j).mus   = 286 ;
 mediaProperties(j).g     = 0.9 ;
 mediaProperties(j).n     = 1.4 ;
+
+% 900 nm ------------------------------------------------------------------
+    case 900
+        disp('Hola mundo!')
 % -------------------------------------------------------------------------
     otherwise
         disp('mmm...')
