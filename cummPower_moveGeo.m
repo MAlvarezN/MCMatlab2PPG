@@ -11,11 +11,12 @@ Nsteps = 100 ;
 
 %% trials
 cummulativePowerAbsorTrial = zeros(5,Nsteps) ; 
+fldres = "09_11_700" ;
 for k = 1 : 10
     home
 disp(["trial: " + k])
 % Save current model: date + beam type
-fldResults = "..\Results\2021\09_10\bt2_t" + k + "\";
+fldResults = "..\Results\2021\"+fldres+"\bt2_t" + k + "\";
 
 cummlativePowerAbsor = zeros(1,Nsteps) ;
 for j = 1 : Nsteps
@@ -49,7 +50,7 @@ end
     drawnow
     xlabel('y[cm]')
     ylabel('total Power (sum(sum))')
-    ntitle = "ppg 890[nm] (10 trial)" ;
+    ntitle = "ppg 700[nm] (10 trial)" ;
     title(ntitle)
 %     pause(.0001)
     
@@ -62,7 +63,16 @@ end
 figure,
 boxplot(cummulativePowerAbsorTrial)
 
+load("D:\Michael_MCMatlab\Results\2021\"+fldres+"\model.mat")
 figure,
+% Distance (guess) for the Ellipses on geometry
+    pL1 = .2 ;
+    pL2 = -.3 ;
+
+Nsteps = 100 ;
+pL1values = linspace( - model.G.Ly/2 - (2* pL1 ) , model.G.Ly/2 + 2*( pL1 - pL2 ) , Nsteps ) ;
+pL2values = pL1values - ( pL1 - pL2 ) ;
+
 p = polyfit(pL1values,mean(cummulativePowerAbsorTrial),20) ;
     plot(mean(cummulativePowerAbsorTrial(:,1:i))) ; 
     hold on

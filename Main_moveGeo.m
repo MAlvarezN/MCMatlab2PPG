@@ -1,5 +1,5 @@
 %% Decription
-% This example simulates a collimated top hat beam of radius 300 µm
+% This example simulates a collimated top hat beam of radius 300 Âµm
 % incident on skin, with some gel (water) on the top. This example is
 % constructed identically to that on the mcxyz website, except that photons
 % escape on all boundaries and the voxel grid is only 100x100x100:
@@ -14,7 +14,7 @@
 
 %
 
-% close all; clear; clc
+close all; clear; clc
 
 %% Geometry definition
 model = MCmatlab.model;
@@ -91,7 +91,7 @@ model.MC.boundaryType             = 1; % 0: No escaping boundaries,
                                        % 1: All cuboid boundaries are escaping, 
                                        % 2: Top cuboid boundary only is escaping
 % lambda values: 660 - 750 - 800 - 850 - 900 - 950                                       
-model.MC.wavelength               = 500 ; % [nm] Excitation wavelength,
+model.MC.wavelength               = 700 ; % [nm] Excitation wavelength,
                                          %  used for determination of optical properties for excitation 
                                          %  light
 % model.G.mediaPropParams{1} = model.MC.wavelength ;
@@ -173,7 +173,7 @@ rng(k)
     clc
 disp(["trial: " + k])
 % Save current model: date + beam type
-fldResults0 = "..\Results\2021\09_11_500" ;
+fldResults0 = "..\Results\2021\09_11_700" ;
 fldResults  = fldResults0 +         "\bt2_t" + k + "\";
 mkdir(fldResults) % make the folder dont worry if the folder exists
 
@@ -522,6 +522,40 @@ j = 6 ;
 mediaProperties(j).name  = 'rEpidermis';
 mediaProperties(j).mua   = 2.16 ;
 mediaProperties(j).mus   = 400 ;
+mediaProperties(j).g     = 0.9 ;
+mediaProperties(j).n     = 1.4 ;
+
+% 700 nm ------------------------------------------------------------------
+    case 700
+
+j=2;
+mediaProperties(j).name = 'dermis';
+mediaProperties(j).mua = 0.442 ;
+mediaProperties(j).mus = 184 ;
+mediaProperties(j).g   = 0.9 ;
+mediaProperties(j).n   = 1.4 ;
+j=3;
+mediaProperties(j).name  = 'blood';
+mediaProperties(j).mua = 3.57 ;
+mediaProperties(j).mus = 71.4 ;
+mediaProperties(j).g   = 0.9 ;
+mediaProperties(j).n   = 1.4 ;
+j = 5 ;
+mediaProperties(j).name  = 'subcutis';
+mediaProperties(j).mua   = 0.0001 ;
+mediaProperties(j).mus   = 235 ;
+mediaProperties(j).g     = 0.9 ;
+mediaProperties(j).n     = 1.4 ;
+j = 4 ;
+mediaProperties(j).name  = 'vessel';
+mediaProperties(j).mua   = 0.8 ;
+mediaProperties(j).mus   = 230 ;
+mediaProperties(j).g     = 0.9 ;
+mediaProperties(j).n     = 1.4 ;
+j = 6 ;
+mediaProperties(j).name  = 'rEpidermis';
+mediaProperties(j).mua   = 0.708 ;
+mediaProperties(j).mus   = 286 ;
 mediaProperties(j).g     = 0.9 ;
 mediaProperties(j).n     = 1.4 ;
 % -------------------------------------------------------------------------
